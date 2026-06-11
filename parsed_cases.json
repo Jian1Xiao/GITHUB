@@ -1,0 +1,1035 @@
+[
+  {
+    "sheet": "充放电",
+    "category": "直流放电",
+    "id": "BMS_001",
+    "title": "直流放电（即插即用）",
+    "description": "将枪插入目标车辆/充电测试箱，tcu检测到充电枪连接到被充车辆时即进行放电",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.车辆上ON档电\n通过屏幕设置放电模式为直流放电",
+      "2.插入充电枪",
+      "3.TCU检测到充电枪连接成功",
+      "4.Tcu闭合K10和K20继电器",
+      "5.60kw DCDC开始工作",
+      "6.BMS开始放电",
+      "8.按下显示屏停止放电按钮",
+      "9.断开K1、K2继电器",
+      "10.断开放负放正继电器"
+    ],
+    "expected": "715xh TCU_ModeCtrl=0\n充电枪连接正常\n10228AF6xh CC_ConnectCarStatus=0\n报文ID:18F102F6xh信号ChargeModeRseponse=5（1：遥控方式；2\n扫码方式；5：即插即充），开始自动放电\n10228AF6 CC_K10=1\n                 CC_K20=1\nDCDC灯闪烁和风扇转动\n18FF02F3 BMS_BatStatus=12（增加实际功能表现放电电流电压）\n8.显示屏下发 1003F68A VCU_ChargePortID=01/02\nVCU_ChargeStopReason = 1，风扇停止运行\n9.10228AF6 \n   CC_K10=0，CC_K20=0\n10.18FF06F3  DisChargNegativeRelay=2\n DisChargPositiveRelay=2",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_002",
+    "title": "直流放电（扫码放电）",
+    "description": "将枪插入目标车辆/充电测试箱，扫描二维码对tcu发送启停充电指令",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.车辆上ON档电\n通过屏幕设置放电模式为直流放电",
+      "2.插入充电枪",
+      "3用户通过云平台对tcu发送启停充电指令（扫码）",
+      "5.Tcu闭合K10和K20继电器",
+      "6.60kw DCDC开始工作",
+      "7.BMS开始放电",
+      "8.按下显示屏停止放电按钮/点击小程序结束冲电",
+      "9.断开K1、K2继电器",
+      "10.断开放负放正继电器",
+      "1.车辆上ON档电\n通过屏幕设置放电模式为交流放电",
+      "TCU控制ACDC进行逆变，为380V插座供电",
+      "1.车辆上ON档电\n通过屏幕设置放电模式为交流放电",
+      "TCU控制ACDC进行逆变，为三个220V插座供电",
+      "1.插入充电枪",
+      "2.BMS控制充负1和充负2继电器闭合",
+      "3.等待3min",
+      "4.结束放电",
+      "1、通过显示屏将整机模式切换为交流补电模式；",
+      "2、TCU接收到交流补电指令后，控制ACDC进入到整流模式；",
+      "3、将工业电接入到整机，系统进行交流补电。",
+      "TCU根据BMS的状态请求，控制ACDC进入到恒流/恒压充电模式",
+      "2.BMS控制充负1和充负2继电器闭合",
+      "3.等待3min",
+      "4.结束放电"
+    ],
+    "expected": "715xh TCU_ModeCtrl=0\n充电枪连接正常\n10228AF6xh CC_ConnectCarStatus=0\n报文ID:18F102F6xh信号ChargeModeRseponse=2（1：遥控方式；2\n扫码方式；5：即插即充），开始自动放电\nTCU照GB/T 27930进行充电，并实时上传电量、功率、电压、电流等信息给平台\n10228AF6 CC_K10=1\n                 CC_K20=1\nDCDC灯闪烁和风扇转动\n18FF02F3 BMS_BatStatus=12（增加实际功能表现放电电流电压）\n8.显示屏下发 1003F68A VCU_ChargePortID=01/02\nVCU_ChargeStopReason = 1，风扇停止运行\n平台下发停止放电VCU_ChargeStopReason = 1，风扇停止运行\n9.10228AF6 \n   CC_K10=0，CC_K20=0\n10.18FF06F3  DisChargNegativeRelay=2\n DisChargPositiveRelay=2\n715xh TCU_ModeCtrl=3\n插座有电，用电器可正常工作\n715xh TCU_ModeCtrl=3\n插座有电，用电器可正常工作\n1.充电桩与充电柜连接成功\n2.18FF06F3 ChargPositiveRelay1 = 1 \n   ChargNegativeRelay1=1\n3.补能功率按照MAP图输出，12V蓄电池开始充电\n4.断开充正充负继电器\n715xh TCU_ModeCtrl=2\n18F0305Axh Mod_Char=0\n2.18FF06F3 ChargPositiveRelay1 = 1 \n   ChargNegativeRelay1=1\n3.补能功率按照MAP图输出，12V蓄电池开始充电\n4.断开充正充负继电器",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_007",
+    "title": "故障下电",
+    "description": "BMS故障三级强制下电",
+    "priority": "1-High",
+    "precondition": "充电或放电正常时",
+    "steps": [
+      "1.制造BMS三级故障"
+    ],
+    "expected": "强制下电，断开继电器，并上报故障",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_008",
+    "title": "故障等级处理",
+    "description": "一 / 二 / 三级故障响应",
+    "priority": "1-High",
+    "precondition": "交流放电（50kW）",
+    "steps": [
+      "1.CANoe 依次强制一 / 二 / 三级故障"
+    ],
+    "expected": "1. 一级（过温）：屏显 “环境过温”，报文 Fault_Level=1，功率 50kW 不变\n2. 二级（欠压）：屏显 “直流欠压”，报文 Fault_Level=2，功率 25kW\n3. 三级（通信）：屏显 “通信故障”，报文 Fault_Level=3，功率 0kW",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_009",
+    "title": "连续充电",
+    "description": "连续充电至100%后自动断开",
+    "priority": "1-High",
+    "precondition": "充电功能正常",
+    "steps": [
+      "插入充电枪",
+      "连续充电至100%"
+    ],
+    "expected": "充电桩与桩连接成功\n充满后自动断开",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_009",
+    "title": "连续放电",
+    "description": "整车无故障，上装电池SOC大于40%",
+    "priority": "1-High",
+    "precondition": "放电功能正常",
+    "steps": [
+      "1.将充电枪插入目标车辆",
+      "2.按下放电按钮",
+      "3.BMS电池电量小于10%"
+    ],
+    "expected": "目标车辆显示枪已连接\n开始放电\n停止放电",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_010",
+    "title": "急停下电功能",
+    "description": "整车上电后，向外部充电，VCU向CCU发送紧急下电指令，CCU停止充电",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.将充电枪插入目标车辆",
+      "2.Tcu闭合K10和K20继电器",
+      "3.BMS发送放电",
+      "4.按下急停按钮",
+      "5.CCU发送停止充电指令"
+    ],
+    "expected": "充电枪连接成功\n10228AF6xh CC_ConnectCarStatus=0\n10228AF6 CC_K10=1\n                 CC_K20=1\n目标车辆开始充电\n18FF02F3 BMS_BatStatus=12\nVCU发送紧急下高压指令给BMS\n1802F38A\nVCU_Emergency_HV_OFF_REQ=2\n10138AF6\nCC_ChargeStopReason=1",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_011",
+    "title": "充电停止按钮",
+    "description": "整车上电后，向外部充电，按下显示屏停止按钮，tcu停止放电",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.将充电枪插入目标车辆",
+      "2.Tcu闭合K10和K20继电器",
+      "3.BMS发送放电",
+      "4.按下显示屏停止按钮",
+      "5.TCU解锁电子锁"
+    ],
+    "expected": "充电枪连接成功\n10228AF6xh CC_ConnectCarStatus=0\n10228AF6 CC_K10=1\n                 CC_K20=1\n目标车辆开始充电\n18FF02F3 BMS_BatStatus=12\nTCU收到信号断开K10和K20继电器（10228AF6 CC_K10=0 CC_K20=0）\n100DF68A \nOperation_instructions=0",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_011",
+    "title": "故障上报",
+    "description": "整车上电后，充电控制系统和BMS向整车上报故障",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.整车上电，CCU开始自检，当CCU有故障时"
+    ],
+    "expected": "CCU向VCU发送故障信息",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_012",
+    "title": "故障上报",
+    "description": "整车上电后，充电控制系统向VCU发送故障状态信息",
+    "priority": "1-High",
+    "precondition": "整车处于上电状态，BMS,CCU自检通过",
+    "steps": [
+      "1.将充电枪插入目标车辆",
+      "2.遥控器拨至放电按钮，VCU发送请求上高压",
+      "3.BMS发送放电",
+      "4.充电过程中CCU故障"
+    ],
+    "expected": "充电枪连接正常\n10228AF6xh CC_ConnectCarStatus=0\n1802F38Axh VCU_HV_ONOFF_cmd=1\n目标车辆开始充电\n18FF01F3 BMS_BatStatus=10\n停止充电，CCU向VCU发送故障信息",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "BMS_013",
+    "title": "故障存储与清除",
+    "description": "故障存储 + 重启清除",
+    "priority": "1-High",
+    "precondition": "设备上电，待机",
+    "steps": [
+      "1.CANoe 强制风扇故障→查故障→重启"
+    ],
+    "expected": "1. 故障时：屏显 “风扇故障”，报文 Fan_NoRun_Fault=1\n2. 重启后：屏显无故障，报文 Fan_NoRun_Fault=0",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": "sop表发送-放电 SOP 测试",
+    "id": "SOP-001",
+    "title": "兰钧电池 25℃~40℃、SOC85%~100% 满功率放电验证",
+    "description": "验证兰钧电池在标准常温区间、高 SOC 区间下，BMS 放电 SOP 输出额定满功率，整车 / 整机无降功率限制",
+    "priority": "1-High",
+    "precondition": "1、设备高压上电完成，系统无故障；2、电池为兰钧磷酸铁锂电池；3、无告警、无保护限制",
+    "steps": [
+      "1、电池温度 25℃~40℃；\n2、 SOC 区间为 85%~100%；\n3、下发放电指令，开启满功率放电；\n4、监控 BMS 放电 SOP 报文、实际放电功率、上位机与屏显状态"
+    ],
+    "expected": "1、BMS 上报最大放电 SOP 为额定满功率60kw；\n2、系统无降功率限流逻辑；\n3、实际放电功率正常拉满，运行稳定4、屏显、后台平台无功率受限告警",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "SOP-002",
+    "title": "临工新能源电池(107kwh) 15℃~45℃、SOC20%~100% 满功率放电验证",
+    "description": "验证临工新能源电池常规工作温区、全段可用 SOC 范围内，放电 SOP 允许满功率输出，无主动降功率限制",
+    "priority": "1-High",
+    "precondition": "1. 设备高压上电正常，整机无故障、无告警；2. 电池为临工新能源配套电池；3. 系统无保护限流触发",
+    "steps": [
+      "1. 电池温度 15℃~45℃；\n2.SOC 区间 20%~100%；\n3. 下发放电指令，执行满功率放电；\n4. 持续监控 BMS 放电 SOP 报文、实际放电功率及屏显、平台状态"
+    ],
+    "expected": "1、BMS 上报最大放电 SOP 为额定满功率60kw；\n2、系统无降功率、限流限制；\n3、实际放电可稳定满功率运行；\n4、显示屏及平台无功率受限类告警",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "SOP-003",
+    "title": "临工新能源电池(71kwh) \n15℃~45℃、SOC20%~100% 满功率放电验证",
+    "description": "验证临工新能源电池常规工作温区、全段可用 SOC 范围内，放电 SOP 允许满功率输出，无主动降功率限制",
+    "priority": "1-High",
+    "precondition": "1. 设备高压上电正常，整机无故障、无告警；2. 电池为临工新能源配套电池；3. 系统无保护限流触发",
+    "steps": [
+      "1. 电池温度 15℃~45℃；\n2.SOC 区间 20%~100%；\n3. 下发放电指令，执行满功率放电；\n4. 持续监控 BMS 放电 SOP 报文、实际放电功率及屏显、平台状态"
+    ],
+    "expected": "1、BMS 上报最大放电 SOP 为额定满功率30kw；\n2、系统无降功率、限流限制；\n3、实际放电可稳定满功率运行；\n4、显示屏及平台无功率受限类告警",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": "sop表发送-充电 SOP 测试",
+    "id": "SOP-004",
+    "title": "兰钧电池20℃~50℃、SOC0%~60% 1C 倍率充电验证",
+    "description": "验证兰钧电池在标准充电温区、低 SOC 区间内，充电 SOP 允许 1C 倍率正常充电，无降额限流保护",
+    "priority": "1-High",
+    "precondition": "1. 设备高压上电正常，整机无故障、无告警；2. 搭载兰钧动力电池；3. 充电回路完好，无保护类限制触发",
+    "steps": [
+      "1. 电池温度 20℃~50℃；\n2. SOC 区间 0%~60%；\n3. 下发充电指令，执行 1C 倍率充电；\n4. 持续监控充电 SOP 报文、实际充电电流、屏显及平台状态"
+    ],
+    "expected": "电池理论 1C 充电功率为 107kw，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以60kw 满功率稳定充电；系统无降功率、无告警，充电运行正常",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "SOP-005",
+    "title": "临工新能源电池(71kwh) \n 20℃~45℃、SOC0%~60% 1C 倍率充电验证",
+    "description": "验证临工新能源电池在适宜充电温度区间、低中 SOC 段，充电 SOP 可支持 1C 倍率正常充电，无降额限流",
+    "priority": "1-High",
+    "precondition": "1. 整机高压上电完成，无故障、无告警；2. 搭载临工新能源配套电池；3. 充电回路正常，无保护限制触发",
+    "steps": [
+      "1. 电池温度 20℃~45℃；\n2.SOC 区间 0%~60%；\n3. 下发充电指令，开启 1C 倍率充电；\n4. 监控充电 SOP 报文、实际充电电流、整机屏显及后台平台"
+    ],
+    "expected": "电池理论 1C 充电功率为 71kW，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以 30kW 满功率稳定充电；系统无降功率、无告警，充电运行正常",
+    "validate": null
+  },
+  {
+    "sheet": "充放电",
+    "category": null,
+    "id": "SOP-006",
+    "title": "临工新能源电池(107kwh) \n 20℃~45℃、SOC0%~60% 1C 倍率充电验证",
+    "description": "验证临工新能源电池在适宜充电温度区间、低中 SOC 段，充电 SOP 可支持 1C 倍率正常充电，无降额限流",
+    "priority": "1-High",
+    "precondition": "1. 整机高压上电完成，无故障、无告警；2. 搭载临工新能源配套电池；3. 充电回路正常，无保护限制触发",
+    "steps": [
+      "1. 电池温度 20℃~45℃；\n2.SOC 区间 0%~60%；\n3. 下发充电指令，开启 1C 倍率充电；\n4. 监控充电 SOP 报文、实际充电电流、整机屏显及后台平台",
+      "1、整机高压上电完成\n2、查看报文",
+      "1、整机高压上电完成\n2、查看报文",
+      "1、整机高压上电完成\n2、查看报文",
+      "1、整机高压上电完成\n2、查看报文",
+      "1、整机高压上电完成\n2、查看报文",
+      "1. BMS接通，上位机与其连接正常；2. 上位机选择本地匹配升级文件，点击开始升级；3. 升级完成后重启BMS，验证版本及功能。"
+    ],
+    "expected": "电池理论 1C 充电功率为 107kw，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以 60kw 满功率稳定充电；系统无降功率、无告警，充电运行正常\n18FF01F3xh soc=\n18FF01F3xh Vol_Bat=\n18FF01F3xh cur_Bat=\n18FF02F3xh BMS_BatStatus=2\n18FF05F3xh InsulationValue=\n1. 连接稳定，文件识别正常；2. 升级无卡顿，完成后自动重启；3. 版本匹配，BMS功能正常。",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": "显示屏功能测试",
+    "id": "Display-001",
+    "title": "待机信息显示",
+    "description": "桩上电后观察显示屏界面的显示信息，显示正常",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡电",
+    "steps": [
+      "1. 桩处于上电状态"
+    ],
+    "expected": "1. 显示储能桩的 VCU 发出的 VIN、BMS 发出的充电车 SOC；显示屏显示充电二维码；显示屏显示年月日和星期2. 显示交流放电和补电开关",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-002",
+    "title": "界面跳转",
+    "description": "界面跳转逻辑",
+    "priority": "1-High",
+    "precondition": "桩处于 ON 挡",
+    "steps": [
+      "1. 将充电枪插入目标车辆\n2. 桩开始放电\n3. 结束放电，未拔枪\n4. 充电枪即不再挂枪位也不在充电位\n5. 充电枪归位"
+    ],
+    "expected": "1. 充电枪连接成功，显示屏显示充电二维码，并提示用户扫码启动充电\n2. 开始放电，显示屏页面跳转至充电中界面，显示充电电量，SOC，充电功率，电流，电压信息\n3. 显示 TCU 发出的充电功率、充电电压、充电电流、被充车辆 SOC、剩余充电时间、已充时间\n4. 显示屏提示用户充电结束，将充电枪插回挂枪插座\n5. 显示充电时长、电量、结束 SOC，10s 后回到待机界面",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-003",
+    "title": "补能界面显示",
+    "description": "补能中界面显示",
+    "priority": "1-High",
+    "precondition": "桩处于 ON 挡",
+    "steps": [
+      "1. 给桩补能中"
+    ],
+    "expected": "交流补电：1. 显示屏显示三相电压、充电电流、工作模式、单相电压、放电电流、设备状态、直流电压、放电功率和停止按钮\n直流补电：1. 显示屏显示 BMS 发送的剩余充电时间、电池电压、充电电流、剩余电量、已充时长",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-005",
+    "title": "控制操作界面-故障码",
+    "description": "进入调试界面，可查看故障码 / 设备信息 / 参数配置",
+    "priority": "1-High",
+    "precondition": "储能桩处于 ON 挡，发生故障时，显示屏页面显示红色提示词",
+    "steps": [
+      "1. 点击屏幕左上角，输入密码 1024 进入调试界面\n2. 进入后点击打开告警显示，进入日志读取"
+    ],
+    "expected": "1. 当前设备故障，请联系运维人员处理，或选择其他设备进行服务\n2. 显示故障码信息和故障详情",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-005-1",
+    "title": "控制操作界面-软硬件版本",
+    "description": "查看各控制器软硬件版本",
+    "priority": "1-High",
+    "precondition": "储能桩处于 ON 挡",
+    "steps": [
+      "1. 点击屏幕左上角，输入密码 1024 进入调试界面\n2. 选择设备信息查看"
+    ],
+    "expected": "在屏幕查看：\n1.BMS 软件版本、硬件版本号\n2.TCU 软件版本号、硬件版本号\n3.VCU 软件版本、硬件版本",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-005-2",
+    "title": "控制操作界面 - 参数配置",
+    "description": "参数配置功能校验",
+    "priority": "1-High",
+    "precondition": "储能桩处于 ON 挡",
+    "steps": [
+      "1. 点击屏幕左上角，输入密码 1024 进入调试界面\n2. 选择参数配置"
+    ],
+    "expected": "系统语言切换、放电启动方式、时间校准、充电桩编号绑定、充电桩二维码绑定功能均正常",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-006",
+    "title": "交流放电模式切换",
+    "description": "交流放电中界面信息显示",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，进入交流放电模式",
+    "steps": [
+      "1. 启动交流放电\n2. 查看界面显示"
+    ],
+    "expected": "1. 显示三相电压、单相电压、直流电压\n2. 显示放电电流、放电功率、充电电流 = 0\n3. 工作模式 = 放电模式，设备状态 = 放电中\n4. 显示停止按钮",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-007",
+    "title": "直流放电模式切换",
+    "description": "直流放电运行中界面显示",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，进入直流放电",
+    "steps": [
+      "1. 进入直流放电模式\n2. 查看界面",
+      "1. 启动交流补电\n2. 查看界面显示",
+      "1. 进入直流补电模式\n2. 查看界面"
+    ],
+    "expected": "1. 显示直流电压、放电电流、放电功率\n2. 工作模式 = 放电模式\n3. 设备状态 = 放电中\n4. 显示停止按钮\n1.显示三相电压、充电电流、工作模式、单项电压、设备状态等系统当前运行参数\n2、补电结束后，自动跳转回待机界面\n1.显示电池电压、已充电量、充电电流、剩余电量、充电时常和剩余时间。\n2、补电结束后，自动跳转回待机界面",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-008",
+    "title": "交流模式启动确认弹窗",
+    "description": "点击交流补电 / 放电时弹窗校验",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，待机",
+    "steps": [
+      "1. 点击交流补电\n2. 点击交流放电"
+    ],
+    "expected": "1. 点击交流补电：弹出 “是否启动交流补电模式？YES/NO”\n2. 点击交流放电：弹出 “是否启动交流放电模式？YES/NO”",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-009",
+    "title": "直流 / 交流模式切换提示",
+    "description": "切换工作模式时提示文字显示",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，进行模式切换",
+    "steps": [
+      "1. 交流切直流\n2. 直流切交流"
+    ],
+    "expected": "1. 弹出 “是否退出交流模式？YES/NO”\n2. 切换时显示 “正在切换到直流工作模式…”",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-010",
+    "title": "直流补电自动提示弹窗",
+    "description": "插枪自动进入直流补电提示",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，插直流枪",
+    "steps": [
+      "1. 插入直流充电枪"
+    ],
+    "expected": "屏幕弹出：充电插座已连接，正在切换到直流补电模式",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-011",
+    "title": "直流补电互锁提示",
+    "description": "补电中禁止切换模式提示",
+    "priority": "1-High",
+    "precondition": "处于直流补电中",
+    "steps": [
+      "1. 尝试切换其他模式"
+    ],
+    "expected": "弹出：正在直流补电，如果要使用其他功能，请先停止补电",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-012",
+    "title": "充电枪未挂起提示",
+    "description": "枪不在插座也不在车端提示",
+    "priority": "1-High",
+    "precondition": "桩 ON 挡，枪被取下乱放",
+    "steps": [
+      "1. 将枪取下，不插车不挂座"
+    ],
+    "expected": "弹出：充电枪已取下，请插枪使用或挂回充电插座",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-013",
+    "title": "低压电池告警弹窗",
+    "description": "低压告警界面显示",
+    "priority": "1-High",
+    "precondition": "系统检测低压",
+    "steps": [
+      "1. 触发低压信号"
+    ],
+    "expected": "弹出：低压电池，电量不足！点击 OK 可关闭",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-014",
+    "title": "设备故障页面显示",
+    "description": "故障状态下整机故障页面",
+    "priority": "1-High",
+    "precondition": "设备发生严重故障",
+    "steps": [
+      "1. 触发 DCAC / 系统故障"
+    ],
+    "expected": "屏幕跳转到：当前设备故障，请联系运维人员处理",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-015",
+    "title": "出厂设置界面测试",
+    "description": "调试菜单 — 出厂设置页面",
+    "priority": "1-High",
+    "precondition": "进入调试界面",
+    "steps": [
+      "1. 输入密码 1024\n2. 进入出厂设置"
+    ],
+    "expected": "显示：平台选择、蓄电池低压报警阈值、屏幕波特率、VIN 填充、主页选择、VIN 绑定，功能正常",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-016",
+    "title": "首页模式状态同步",
+    "description": "交流放电 / 补电开关状态实时刷新",
+    "priority": "1-High",
+    "precondition": "启动 / 停止交流模式",
+    "steps": [
+      "1. 启动交流补电\n2. 停止交流补电\n3. 启动交流放电\n4. 停止交流放电"
+    ],
+    "expected": "1. 启动后首页显示：交流补电开 / 交流放电开\n2. 停止后显示：交流补电关 / 交流放电关",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-017",
+    "title": "直流充电结束界面",
+    "description": "充电结束页完整信息",
+    "priority": "1-High",
+    "precondition": "直流充电结束",
+    "steps": [
+      "1. 停止直流充电"
+    ],
+    "expected": "显示：枪编号、充电电量、终止 SOC、充电时长、停止原因、绝缘电压",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": null,
+    "id": "Display-018",
+    "title": "调试控制页面",
+    "description": "密码登录 + 参数配置",
+    "priority": "1-High",
+    "precondition": "设备上电，待机",
+    "steps": [
+      "1. 屏显右上角→输 1024→进调试页→改参数 / 查故障 / 查版本"
+    ],
+    "expected": "1. 登录：密码对→进调试页；错→“密码错误”\n\n2. 参数：改放电模式→报文同步更新；查故障→显完整列表；查版本→显 BMS/TCU/VCU 版本",
+    "validate": null
+  },
+  {
+    "sheet": "显示器",
+    "category": "系统模式显示",
+    "id": "Display-019",
+    "title": "模式显示一致性",
+    "description": "屏显模式与 TCU 指令匹配",
+    "priority": "1-High",
+    "precondition": "设备上电，待机",
+    "steps": [
+      "1. 屏显切四种模式→CANoe 看 715xh"
+    ],
+    "expected": "1. 直流补电：屏显 “直流补电”，报文 715xh=0\n2. 直流放电：屏显 “直流放电”，报文 715xh=1\n3. 交流补电：屏显 “交流补电”，报文 715xh=2\n4. 交流放电：屏显 “交流放电”，报文 715xh=3（延迟＜1s）",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": "直流补电模式",
+    "id": "TC-DC-001",
+    "title": "直流补电全流程测试",
+    "description": "验证直流补电模式启动、运行、停止全流程",
+    "priority": null,
+    "precondition": "1. 设备上电待机2. 无故障告警3. 直流充电枪连接正常",
+    "steps": [
+      "1. 插入直流充电枪",
+      "2. 等待模式自动启动",
+      "3. 查看运行界面",
+      "4. 点击停止按钮退出"
+    ],
+    "expected": "1. 屏幕弹出：充电插座已连接，正在切换到直流补电模式\n2. 进入直流补电页面，显示：补电中、电池电压、充电电流、已充电量、剩余电量\n3. 报文：715xh (TCU_ModeCtrl=0)、18F0310Axh (TCU_ModeSts=0)\n4. 停止后返回首页，补电关闭",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": "直流放电模式",
+    "id": "TC-DC-002",
+    "title": "直流放电全流程测试",
+    "description": "验证直流放电模式启动、运行、停止全流程",
+    "priority": null,
+    "precondition": "1. 设备上电待机2. 无故障告警3. 直流侧具备放电条件",
+    "steps": [
+      "1. 触发直流模式切换",
+      "2. 弹窗点击 YES 确认",
+      "3. 查看放电运行界面",
+      "4. 点击停止按钮退出"
+    ],
+    "expected": "1. 屏幕弹窗：是否退出交流模式？→ 点 YES\n2. 提示：正在切换到直流工作模式…\n3. 进入直流放电页面，显示：放电模式、放电中、电压 / 电流 / 功率\n4. 报文：715xh (TCU_ModeCtrl=1)、18F0310Axh (TCU_ModeSts=1)\n5. 停止后返回首页，放电关闭",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": "交流补电模式",
+    "id": "TC-AC-001",
+    "title": "交流补电全流程测试",
+    "description": "验证交流补电模式启动、运行、停止全流程",
+    "priority": null,
+    "precondition": "1. 设备上电待机2. 无故障告警3. 交流电网正常接入",
+    "steps": [
+      "1. 首页点击【交流补电】",
+      "2. 弹窗点击 YES 确认",
+      "3. 查看补电运行界面",
+      "4. 点击停止按钮退出"
+    ],
+    "expected": "1. 屏幕弹窗：是否启动交流补电模式？→ 点 YES\n2. 提示：正在启动交流补电模式…\n3. 进入交流补电页面，显示：补电模式、补电中、三相 / 单相 / 直流电压、充电电流4. 报文：715xh (TCU_ModeCtrl=2)、18F0310Axh (TCU_ModeSts=2)\n5. 停止后首页显示：交流补电关",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": "交流放电模式",
+    "id": "TC-AC-002",
+    "title": "交流放电全流程测试",
+    "description": "验证交流放电模式启动、运行、停止全流程",
+    "priority": null,
+    "precondition": "1. 设备上电待机2. 无故障告警3. 交流负载可接入",
+    "steps": [
+      "1. 首页点击【交流放电】",
+      "2. 弹窗点击 YES 确认",
+      "3. 查看放电运行界面",
+      "4. 点击停止按钮退出"
+    ],
+    "expected": "1. 屏幕弹窗：是否启动交流放电模式？→ 点 YES\n2. 进入交流放电页面，显示：放电模式、放电中、三相电压、放电电流、放电功率\n3. 报文：715xh (TCU_ModeCtrl=3)、18F0310Axh (TCU_ModeSts=3)\n4. 停止后首页显示：交流放电关",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": "DCAC 故障",
+    "id": "ERR-01",
+    "title": "交流过压故障测试",
+    "description": "CANoe 模拟交流过压，验证故障上报、屏显及平台同步",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 ACOV_Fault=1"
+    ],
+    "expected": "1. 屏幕：弹出交流过压告警，故障页显示交流过压\n2. 报文：18F0310Axh.ACOV_Fault=1\n3. 平台：显示交流过压故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-02",
+    "title": "交流欠压故障测试",
+    "description": "CANoe 模拟交流欠压，验证三级上报",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 Mod_ACUV_Fault=1"
+    ],
+    "expected": "1. 屏幕：显示交流欠压故障告警\n2. 报文：18F0310Axh.Mod_ACUV_Fault=1\n3. 平台：显示交流欠压故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-03",
+    "title": "直流输出过压故障测试",
+    "description": "CANoe 模拟直流过压，验证保护与上报",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 DcOutput_OverVolt_Fault=1"
+    ],
+    "expected": "1. 屏幕：故障停机，提示直流过压\n2. 报文：18F0310Axh.DcOutput_OverVolt_Fault=1\n3. 平台：显示直流输出过压故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-04",
+    "title": "直流输出欠压故障测试",
+    "description": "CANoe 模拟直流欠压，验证上报",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 DcOut_UV_Fault=1"
+    ],
+    "expected": "1. 屏幕：显示直流欠压故障\n2. 报文：18F0310Axh.DcOut_UV_Fault=1\n3. 平台：显示直流输出欠压故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-05",
+    "title": "交流过压脱离故障",
+    "description": "CANoe 模拟过压关机，验证脱离",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 ACOV_Fault=1"
+    ],
+    "expected": "1. 屏幕：提示设备故障\n2. 报文：18F0310Axh.ACOV_Fault=1\n3. 平台：显示交流过压脱离故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-06",
+    "title": "风扇不运行故障测试",
+    "description": "CANoe 模拟风扇故障，验证上报",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 Fan_NoRun_Fault=1"
+    ],
+    "expected": "1. 屏幕：显示风扇故障告警\n2. 报文：18F0310Axh.Fan_NoRun_Fault=1\n3. 平台：显示风扇不运行故障",
+    "validate": null
+  },
+  {
+    "sheet": "DCAC",
+    "category": null,
+    "id": "ERR-07",
+    "title": "环境过温故障测试",
+    "description": "CANoe 模拟过温，验证告警与上报",
+    "priority": null,
+    "precondition": "设备上电待机；CANoe 在线；平台连接正常",
+    "steps": [
+      "1.CANoe 定位 18F0310Axh  2. 强制 Ambient_OverTemp_Fault=1",
+      "桩 ON 挡电"
+    ],
+    "expected": "1. 屏幕：环境过温告警 / 降额\n2. 报文：18F0310Axh.Ambient_OverTemp_Fault=1\n3. 平台：显示环境过温故障\n1、VCU硬线唤醒12VDC/DC；\n2、根据整机需求自主调整输出功率、电流、电压",
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": "故障诊断",
+    "id": "tcu-002",
+    "title": "模块交流输入过压",
+    "description": "模拟交流过压，验证故障上报与保护",
+    "priority": "1-High",
+    "precondition": "设备上电、待机",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 1 位 0=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-007",
+    "title": "模块交流输入欠压",
+    "description": "模拟交流欠压，停止补电",
+    "priority": "1-High",
+    "precondition": "设备上电、待机",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 1 位 1=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-022",
+    "title": "交流过压脱离",
+    "description": "模拟过压关机，验证脱离",
+    "priority": "1-High",
+    "precondition": "交流运行中",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 1 位 6=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-023",
+    "title": "直流输出过压",
+    "description": "模拟输出过压，保护",
+    "priority": "1-High",
+    "precondition": "放电运行中",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 1 位 6=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-024",
+    "title": "直流输出欠压",
+    "description": "模拟输出欠压，告警",
+    "priority": "1-High",
+    "precondition": "放电运行中",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 2 位 0=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-025",
+    "title": "风扇不运行",
+    "description": "模拟风扇故障，告警",
+    "priority": "1-High",
+    "precondition": "运行中",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 2 位 1=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "tcu-038",
+    "title": "环境过温",
+    "description": "模拟环境过温，限功率",
+    "priority": "1-High",
+    "precondition": "放电运行中",
+    "steps": [
+      "1.CANoe 发送 18F0310Axh，字节 2 位 3=1；2. 查看屏显；3. 查看平台"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": "VCU 电源管理",
+    "id": "VCU_001",
+    "title": "设备上电流程",
+    "description": "ON 档→低压→高压上电",
+    "priority": "1-High",
+    "precondition": "设备断电，无故障",
+    "steps": [
+      "1. 开 ON 档电→观察屏显 + CANoe"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": null,
+    "id": "VCU_002",
+    "title": "设备下电流程",
+    "description": "关 ON 档→高压→低压下电",
+    "priority": "1-High",
+    "precondition": "设备正常上电（待机界面）",
+    "steps": [
+      "1. 关 ON 档电→观察屏显 + CANoe"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": "VCU 高压控制",
+    "id": "VCU_006",
+    "title": "休眠",
+    "description": "断 ON 档→高压下电",
+    "priority": "1-High",
+    "precondition": "设备正常上电（待机界面）",
+    "steps": [
+      "1. 关 ON 档电→观察屏显 + CANoe",
+      "1. 开 ON 档电"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": "VCU 报文路由",
+    "id": "VCU_007",
+    "title": "数据转发测试",
+    "description": "BMS/TCU 数据→转发 T-BOX",
+    "priority": "1-High",
+    "precondition": "设备上电（待机界面），放电回路正常",
+    "steps": [
+      "1. 启动直流放电→观察屏显 + CANoe"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "整车控制",
+    "category": "VCU 急停功能\n",
+    "id": "VCU_008",
+    "title": "急停功能",
+    "description": "急停→触发高压下电",
+    "priority": "1-High",
+    "precondition": "设备放电中",
+    "steps": [
+      "1. 按下急停按钮→观察屏显 + CANoe",
+      "释放急停开关",
+      "1. 查看tcu/bms；2. 查看平台",
+      "1. 依次模拟以下故障：单体过压、总压欠压、单体欠压、过温、过冷、温差过大、压差过大、绝缘过低、继电器粘连\n2. 分别观察各故障触发时的CAN报文\n3. 检查VCU是否接收到BMS发送的故障数据",
+      "1. 模拟ACDC模块发送故障（如：PFCCanErr=1、ACOV_Fault=1等）\n2. 监控CAN报文18F0310Axh中ACDC_ErrSts信号\n3. 查看后台平台日志，确认VCU上报的故障记录",
+      "\n1. 分别触发一级故障（如绝缘故障、单体过压）、二级故障（如总压欠压、温差过大）、三级故障（如一般报警）\n2. 观察报文18FF0DF3xh中Highest_Alarm_Level信号值\n3. 读取VCU接收到的故障等级信息",
+      "1. 触发需限功率50%的故障（如总压欠压），观察放电电流\n2. 触发需限功率0%的故障（如单体过压），观察放电电流\n3. 触发需下高压的故障（如绝缘故障），观察高压状态\n4. 触发需禁止加热/冷却的故障，观察热管理状态",
+      "1. 触发任意一级故障（如单体过压），确认故障已触发\n2. 断开BMS低压电源，等待30秒后重新上电\n3. 读取BMS历史故障记录\n4. 在不重新上电的情况下，尝试清除故障",
+      "1. BMS唤醒后（高压未上电），模拟设置正极绝缘值为500kΩ、负极绝缘值为500kΩ\n2. 观察报文18FF05F3xh中BATT_POSITIVE_RESISTANCE和BATT_NEGATIVE_RESISTANCE信号\n3. 执行高压上电后，再次读取两个绝缘值信号\n4. 分别模拟不同绝缘值（100kΩ、200kΩ、500kΩ、1MΩ），观察VCU接收到的数据",
+      "1. 分别模拟绝缘值处于不同等级阈值区间（如：<100kΩ、100-200kΩ、200-500kΩ）\n2. 观察报文18FF0DF3xh中Err_ISO故障位\n3. 观察报文18FF0DF3xh中Highest_Alarm_Level信号值\n4. 确认VCU接收到的故障码与故障等级",
+      "1. 模拟二级绝缘故障（100-200kΩ），观察车辆响应\n2. 模拟一级绝缘故障（<100kΩ），观察车辆响应\n3. 模拟三级绝缘故障（200-500kΩ），观察车辆响应\n4. 三级故障触发后，确认VCU是否下发下高压指令，以及BMS是否执行"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_001",
+    "title": "放电加热（电加热电池包）",
+    "description": "BMS检测电池温度达到加热开启条件时，开始加热",
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "电池温度Tmin小于15°"
+    ],
+    "expected": "标红部分是室温条件下实现不了，需要协调实验室资源",
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_002",
+    "title": "放电加热（液热电池包）",
+    "description": "BMS检测电池温度达到加热开启条件时，开始加热",
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "电池温度Tmin小于15°，BMS发送制热模式、上高压请求给TMS",
+      "电池温度Tmin≥15°"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_003",
+    "title": "电池包加热功率控制",
+    "description": "电加热电池包加热功率控制",
+    "priority": null,
+    "precondition": null,
+    "steps": [
+      "充电加热BMS向充电桩请求固定的充电电压和充电电流限制加热功率。",
+      "BMS发送进水口温度需求给TMS"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_004",
+    "title": "电池包加热故障处理",
+    "description": null,
+    "priority": null,
+    "precondition": "充电加热、放电加热过程中",
+    "steps": [
+      "充电加热、放电加热过程中分别制造电池包加热一二三级故障"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_005",
+    "title": "放电冷却（风冷）_直流充电冷却",
+    "description": "BMS检测电池温度达到开启条件时，开始制冷",
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "最高电池温度Tmax≥35℃且平均温度Tmean≥32℃，BMS闭合风扇继电器开始冷却",
+      "最高电池温度Tmax＜35℃且平均温度Tmean＜32℃，BMS断开风扇继电器开始冷却"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_006",
+    "title": "放电冷却（液冷）",
+    "description": "BMS检测电池温度达到开启条件时，开始制冷",
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "最高电池温度Tmax≥35℃且平均温度Tmean≥32℃；BMS发送制冷模式、上高压请求给TMS后"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_007",
+    "title": "电池包冷却功率控制",
+    "description": "风冷电池包冷却功率控制",
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "最高电池温度Tmax≥35℃且平均温度Tmean≥32℃",
+      "最高电池温度Tmax≥35℃且平均温度Tmean≥33℃"
+    ],
+    "expected": null,
+    "validate": null
+  },
+  {
+    "sheet": "热管理",
+    "category": null,
+    "id": "BMS_008",
+    "title": "液冷电池包降温故障处理",
+    "description": null,
+    "priority": null,
+    "precondition": "BMS ON档唤醒状态下",
+    "steps": [
+      "放电冷却过程中分别制造电池包加热一二三级故障"
+    ],
+    "expected": null,
+    "validate": null
+  }
+]
