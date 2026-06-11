@@ -1,0 +1,445 @@
+/*
+  Auto-generated CAPL test suite from 充电.xlsx
+  Contains generated test case routines for charging scenarios
+*/
+
+variables
+{
+  msTimer testTimer;
+}
+
+void logTestCase(char id[], char title[])
+{
+  write("=== Charging Test Case %s: %s ===", id, title);
+}
+
+void executeStep(char step[])
+{
+  write("  STEP: %s", step);
+}
+
+void verifyExpectation(char expected[])
+{
+  write("  EXPECT: %s", expected);
+}
+
+void runAllChargingTestCases()
+{
+  write("Starting generated charging test suite...");
+  runCase_BMS_001();
+  runCase_BMS_002();
+  runCase_BMS_007();
+  runCase_BMS_008();
+  runCase_BMS_009();
+  runCase_BMS_009();
+  runCase_BMS_010();
+  runCase_BMS_011();
+  runCase_BMS_011();
+  runCase_BMS_012();
+  runCase_BMS_013();
+  runCase_SOP_001();
+  runCase_SOP_002();
+  runCase_SOP_003();
+  runCase_SOP_004();
+  runCase_SOP_005();
+  runCase_SOP_006();
+  write("Generated charging test suite complete.");
+}
+
+on start
+{
+  runAllChargingTestCases();
+}
+
+void runCase_BMS_001()
+{
+  logTestCase("BMS_001", "直流放电（即插即用） ");
+  write("  Category: 直流放电");
+  write("  Priority: 1-High");
+  write("  Description: 将枪插入目标车辆/充电测试箱，tcu检测到充电枪连接到被充车辆时即进行放电");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.车辆上ON档电");
+  executeStep("通过屏幕设置放电模式为直流放电");
+  executeStep("2.插入充电枪");
+  executeStep("3.TCU检测到充电枪连接成功");
+  executeStep("4.Tcu闭合K10和K20继电器");
+  executeStep("5.60kw DCDC开始工作");
+  executeStep("6.BMS开始放电");
+  executeStep("8.按下显示屏停止放电按钮");
+  executeStep("9.断开K1、K2继电器");
+  executeStep("10.断开放负放正继电器");
+  write("  Expected:");
+  verifyExpectation("715xh TCU_ModeCtrl=0");
+  verifyExpectation("充电枪连接正常");
+  verifyExpectation("10228AF6xh CC_ConnectCarStatus=0");
+  verifyExpectation("报文ID:18F102F6xh信号ChargeModeRseponse=5（1：遥控方式；2");
+  verifyExpectation("扫码方式；5：即插即充），开始自动放电");
+  verifyExpectation("10228AF6 CC_K10=1");
+  verifyExpectation("CC_K20=1");
+  verifyExpectation("DCDC灯闪烁和风扇转动");
+  verifyExpectation("18FF02F3 BMS_BatStatus=12（增加实际功能表现放电电流电压）");
+  verifyExpectation("8.显示屏下发 1003F68A VCU_ChargePortID=01/02");
+  verifyExpectation("VCU_ChargeStopReason = 1，风扇停止运行");
+  verifyExpectation("9.10228AF6");
+  verifyExpectation("CC_K10=0，CC_K20=0");
+  verifyExpectation("10.18FF06F3  DisChargNegativeRelay=2");
+  verifyExpectation("DisChargPositiveRelay=2");
+  write(" ");
+}
+
+void runCase_BMS_002()
+{
+  logTestCase("BMS_002", "直流放电（扫码放电） ");
+  write("  Priority: 1-High");
+  write("  Description: 将枪插入目标车辆/充电测试箱，扫描二维码对tcu发送启停充电指令");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.车辆上ON档电");
+  executeStep("通过屏幕设置放电模式为直流放电");
+  executeStep("2.插入充电枪");
+  executeStep("3用户通过云平台对tcu发送启停充电指令（扫码）");
+  executeStep("5.Tcu闭合K10和K20继电器");
+  executeStep("6.60kw DCDC开始工作");
+  executeStep("7.BMS开始放电");
+  executeStep("8.按下显示屏停止放电按钮/点击小程序结束冲电");
+  executeStep("9.断开K1、K2继电器");
+  executeStep("10.断开放负放正继电器");
+  executeStep("1.车辆上ON档电");
+  executeStep("通过屏幕设置放电模式为交流放电");
+  executeStep("TCU控制ACDC进行逆变，为380V插座供电");
+  executeStep("1.车辆上ON档电");
+  executeStep("通过屏幕设置放电模式为交流放电");
+  executeStep("TCU控制ACDC进行逆变，为三个220V插座供电");
+  executeStep("1.插入充电枪");
+  executeStep("2.BMS控制充负1和充负2继电器闭合");
+  executeStep("3.等待3min");
+  executeStep("4.结束放电");
+  executeStep("1、通过显示屏将整机模式切换为交流补电模式；");
+  executeStep("2、TCU接收到交流补电指令后，控制ACDC进入到整流模式；");
+  executeStep("3、将工业电接入到整机，系统进行交流补电。");
+  executeStep("TCU根据BMS的状态请求，控制ACDC进入到恒流/恒压充电模式");
+  executeStep("2.BMS控制充负1和充负2继电器闭合");
+  executeStep("3.等待3min");
+  executeStep("4.结束放电");
+  write("  Expected:");
+  verifyExpectation("715xh TCU_ModeCtrl=0");
+  verifyExpectation("充电枪连接正常");
+  verifyExpectation("10228AF6xh CC_ConnectCarStatus=0");
+  verifyExpectation("报文ID:18F102F6xh信号ChargeModeRseponse=2（1：遥控方式；2");
+  verifyExpectation("扫码方式；5：即插即充），开始自动放电");
+  verifyExpectation("TCU照GB/T 27930进行充电，并实时上传电量、功率、电压、电流等信息给平台");
+  verifyExpectation("10228AF6 CC_K10=1");
+  verifyExpectation("CC_K20=1");
+  verifyExpectation("DCDC灯闪烁和风扇转动");
+  verifyExpectation("18FF02F3 BMS_BatStatus=12（增加实际功能表现放电电流电压）");
+  verifyExpectation("8.显示屏下发 1003F68A VCU_ChargePortID=01/02");
+  verifyExpectation("VCU_ChargeStopReason = 1，风扇停止运行");
+  verifyExpectation("平台下发停止放电VCU_ChargeStopReason = 1，风扇停止运行");
+  verifyExpectation("9.10228AF6");
+  verifyExpectation("CC_K10=0，CC_K20=0");
+  verifyExpectation("10.18FF06F3  DisChargNegativeRelay=2");
+  verifyExpectation("DisChargPositiveRelay=2");
+  verifyExpectation("715xh TCU_ModeCtrl=3");
+  verifyExpectation("插座有电，用电器可正常工作");
+  verifyExpectation("715xh TCU_ModeCtrl=3");
+  verifyExpectation("插座有电，用电器可正常工作");
+  verifyExpectation("1.充电桩与充电柜连接成功");
+  verifyExpectation("2.18FF06F3 ChargPositiveRelay1 = 1");
+  verifyExpectation("ChargNegativeRelay1=1");
+  verifyExpectation("3.补能功率按照MAP图输出，12V蓄电池开始充电");
+  verifyExpectation("4.断开充正充负继电器");
+  verifyExpectation("715xh TCU_ModeCtrl=2");
+  verifyExpectation("18F0305Axh Mod_Char=0");
+  verifyExpectation("2.18FF06F3 ChargPositiveRelay1 = 1");
+  verifyExpectation("ChargNegativeRelay1=1");
+  verifyExpectation("3.补能功率按照MAP图输出，12V蓄电池开始充电");
+  verifyExpectation("4.断开充正充负继电器");
+  write(" ");
+}
+
+void runCase_BMS_007()
+{
+  logTestCase("BMS_007", "故障下电 ");
+  write("  Priority: 1-High");
+  write("  Description: BMS故障三级强制下电");
+  write("  Precondition: 充电或放电正常时");
+  write("  Steps:");
+  executeStep("1.制造BMS三级故障");
+  write("  Expected:");
+  verifyExpectation("强制下电，断开继电器，并上报故障");
+  write(" ");
+}
+
+void runCase_BMS_008()
+{
+  logTestCase("BMS_008", "故障等级处理 ");
+  write("  Priority: 1-High");
+  write("  Description: 一 / 二 / 三级故障响应");
+  write("  Precondition: 交流放电（50kW）");
+  write("  Steps:");
+  executeStep("1.CANoe 依次强制一 / 二 / 三级故障");
+  write("  Expected:");
+  verifyExpectation("1. 一级（过温）：屏显 “环境过温”，报文 Fault_Level=1，功率 50kW 不变");
+  verifyExpectation("2. 二级（欠压）：屏显 “直流欠压”，报文 Fault_Level=2，功率 25kW");
+  verifyExpectation("3. 三级（通信）：屏显 “通信故障”，报文 Fault_Level=3，功率 0kW");
+  write(" ");
+}
+
+void runCase_BMS_009()
+{
+  logTestCase("BMS_009", "连续充电 ");
+  write("  Priority: 1-High");
+  write("  Description: 连续充电至100%后自动断开");
+  write("  Precondition: 充电功能正常");
+  write("  Steps:");
+  executeStep("插入充电枪");
+  executeStep("连续充电至100%");
+  write("  Expected:");
+  verifyExpectation("充电桩与桩连接成功");
+  verifyExpectation("充满后自动断开");
+  write(" ");
+}
+
+void runCase_BMS_009()
+{
+  logTestCase("BMS_009", "连续放电 ");
+  write("  Priority: 1-High");
+  write("  Description: 整车无故障，上装电池SOC大于40%");
+  write("  Precondition: 放电功能正常");
+  write("  Steps:");
+  executeStep("1.将充电枪插入目标车辆");
+  executeStep("2.按下放电按钮");
+  executeStep("3.BMS电池电量小于10%");
+  write("  Expected:");
+  verifyExpectation("目标车辆显示枪已连接");
+  verifyExpectation("开始放电");
+  verifyExpectation("停止放电");
+  write(" ");
+}
+
+void runCase_BMS_010()
+{
+  logTestCase("BMS_010", "急停下电功能 ");
+  write("  Priority: 1-High");
+  write("  Description: 整车上电后，向外部充电，VCU向CCU发送紧急下电指令，CCU停止充电");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.将充电枪插入目标车辆");
+  executeStep("2.Tcu闭合K10和K20继电器");
+  executeStep("3.BMS发送放电");
+  executeStep("4.按下急停按钮");
+  executeStep("5.CCU发送停止充电指令");
+  write("  Expected:");
+  verifyExpectation("充电枪连接成功");
+  verifyExpectation("10228AF6xh CC_ConnectCarStatus=0");
+  verifyExpectation("10228AF6 CC_K10=1");
+  verifyExpectation("CC_K20=1");
+  verifyExpectation("目标车辆开始充电");
+  verifyExpectation("18FF02F3 BMS_BatStatus=12");
+  verifyExpectation("VCU发送紧急下高压指令给BMS");
+  verifyExpectation("1802F38A");
+  verifyExpectation("VCU_Emergency_HV_OFF_REQ=2");
+  verifyExpectation("10138AF6");
+  verifyExpectation("CC_ChargeStopReason=1");
+  write(" ");
+}
+
+void runCase_BMS_011()
+{
+  logTestCase("BMS_011", "充电停止按钮 ");
+  write("  Priority: 1-High");
+  write("  Description: 整车上电后，向外部充电，按下显示屏停止按钮，tcu停止放电");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.将充电枪插入目标车辆");
+  executeStep("2.Tcu闭合K10和K20继电器");
+  executeStep("3.BMS发送放电");
+  executeStep("4.按下显示屏停止按钮");
+  executeStep("5.TCU解锁电子锁");
+  write("  Expected:");
+  verifyExpectation("充电枪连接成功");
+  verifyExpectation("10228AF6xh CC_ConnectCarStatus=0");
+  verifyExpectation("10228AF6 CC_K10=1");
+  verifyExpectation("CC_K20=1");
+  verifyExpectation("目标车辆开始充电");
+  verifyExpectation("18FF02F3 BMS_BatStatus=12");
+  verifyExpectation("TCU收到信号断开K10和K20继电器（10228AF6 CC_K10=0 CC_K20=0）");
+  verifyExpectation("100DF68A");
+  verifyExpectation("Operation_instructions=0");
+  write(" ");
+}
+
+void runCase_BMS_011()
+{
+  logTestCase("BMS_011", "故障上报 ");
+  write("  Priority: 1-High");
+  write("  Description: 整车上电后，充电控制系统和BMS向整车上报故障");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.整车上电，CCU开始自检，当CCU有故障时");
+  write("  Expected:");
+  verifyExpectation("CCU向VCU发送故障信息");
+  write(" ");
+}
+
+void runCase_BMS_012()
+{
+  logTestCase("BMS_012", "故障上报 ");
+  write("  Priority: 1-High");
+  write("  Description: 整车上电后，充电控制系统向VCU发送故障状态信息");
+  write("  Precondition: 整车处于上电状态，BMS,CCU自检通过");
+  write("  Steps:");
+  executeStep("1.将充电枪插入目标车辆");
+  executeStep("2.遥控器拨至放电按钮，VCU发送请求上高压");
+  executeStep("3.BMS发送放电");
+  executeStep("4.充电过程中CCU故障");
+  write("  Expected:");
+  verifyExpectation("充电枪连接正常");
+  verifyExpectation("10228AF6xh CC_ConnectCarStatus=0");
+  verifyExpectation("1802F38Axh VCU_HV_ONOFF_cmd=1");
+  verifyExpectation("目标车辆开始充电");
+  verifyExpectation("18FF01F3 BMS_BatStatus=10");
+  verifyExpectation("停止充电，CCU向VCU发送故障信息");
+  write(" ");
+}
+
+void runCase_BMS_013()
+{
+  logTestCase("BMS_013", "故障存储与清除 ");
+  write("  Priority: 1-High");
+  write("  Description: 故障存储 + 重启清除");
+  write("  Precondition: 设备上电，待机");
+  write("  Steps:");
+  executeStep("1.CANoe 强制风扇故障→查故障→重启");
+  write("  Expected:");
+  verifyExpectation("1. 故障时：屏显 “风扇故障”，报文 Fan_NoRun_Fault=1");
+  verifyExpectation("2. 重启后：屏显无故障，报文 Fan_NoRun_Fault=0");
+  write(" ");
+}
+
+void runCase_SOP_001()
+{
+  logTestCase("SOP-001", "兰钧电池 25℃~40℃、SOC85%~100% 满功率放电验证 ");
+  write("  Category: sop表发送-放电 SOP 测试");
+  write("  Priority: 1-High");
+  write("  Description: 验证兰钧电池在标准常温区间、高 SOC 区间下，BMS 放电 SOP 输出额定满功率，整车 / 整机无降功率限制");
+  write("  Precondition: 1、设备高压上电完成，系统无故障；2、电池为兰钧磷酸铁锂电池；3、无告警、无保护限制");
+  write("  Steps:");
+  executeStep("1、电池温度 25℃~40℃；");
+  executeStep("2、 SOC 区间为 85%~100%；");
+  executeStep("3、下发放电指令，开启满功率放电；");
+  executeStep("4、监控 BMS 放电 SOP 报文、实际放电功率、上位机与屏显状态");
+  write("  Expected:");
+  verifyExpectation("1、BMS 上报最大放电 SOP 为额定满功率60kw；");
+  verifyExpectation("2、系统无降功率限流逻辑；");
+  verifyExpectation("3、实际放电功率正常拉满，运行稳定4、屏显、后台平台无功率受限告警");
+  write(" ");
+}
+
+void runCase_SOP_002()
+{
+  logTestCase("SOP-002", "临工新能源电池(107kwh) 15℃~45℃、SOC20%~100% 满功率放电验证 ");
+  write("  Priority: 1-High");
+  write("  Description: 验证临工新能源电池常规工作温区、全段可用 SOC 范围内，放电 SOP 允许满功率输出，无主动降功率限制");
+  write("  Precondition: 1. 设备高压上电正常，整机无故障、无告警；2. 电池为临工新能源配套电池；3. 系统无保护限流触发");
+  write("  Steps:");
+  executeStep("1. 电池温度 15℃~45℃；");
+  executeStep("2.SOC 区间 20%~100%；");
+  executeStep("3. 下发放电指令，执行满功率放电；");
+  executeStep("4. 持续监控 BMS 放电 SOP 报文、实际放电功率及屏显、平台状态");
+  write("  Expected:");
+  verifyExpectation("1、BMS 上报最大放电 SOP 为额定满功率60kw；");
+  verifyExpectation("2、系统无降功率、限流限制；");
+  verifyExpectation("3、实际放电可稳定满功率运行；");
+  verifyExpectation("4、显示屏及平台无功率受限类告警");
+  write(" ");
+}
+
+void runCase_SOP_003()
+{
+  logTestCase("SOP-003", "临工新能源电池(71kwh) 
+15℃~45℃、SOC20%~100% 满功率放电验证 ");
+  write("  Priority: 1-High");
+  write("  Description: 验证临工新能源电池常规工作温区、全段可用 SOC 范围内，放电 SOP 允许满功率输出，无主动降功率限制");
+  write("  Precondition: 1. 设备高压上电正常，整机无故障、无告警；2. 电池为临工新能源配套电池；3. 系统无保护限流触发");
+  write("  Steps:");
+  executeStep("1. 电池温度 15℃~45℃；");
+  executeStep("2.SOC 区间 20%~100%；");
+  executeStep("3. 下发放电指令，执行满功率放电；");
+  executeStep("4. 持续监控 BMS 放电 SOP 报文、实际放电功率及屏显、平台状态");
+  write("  Expected:");
+  verifyExpectation("1、BMS 上报最大放电 SOP 为额定满功率30kw；");
+  verifyExpectation("2、系统无降功率、限流限制；");
+  verifyExpectation("3、实际放电可稳定满功率运行；");
+  verifyExpectation("4、显示屏及平台无功率受限类告警");
+  write(" ");
+}
+
+void runCase_SOP_004()
+{
+  logTestCase("SOP-004", "兰钧电池20℃~50℃、SOC0%~60% 1C 倍率充电验证 ");
+  write("  Category: sop表发送-充电 SOP 测试");
+  write("  Priority: 1-High");
+  write("  Description: 验证兰钧电池在标准充电温区、低 SOC 区间内，充电 SOP 允许 1C 倍率正常充电，无降额限流保护");
+  write("  Precondition: 1. 设备高压上电正常，整机无故障、无告警；2. 搭载兰钧动力电池；3. 充电回路完好，无保护类限制触发");
+  write("  Steps:");
+  executeStep("1. 电池温度 20℃~50℃；");
+  executeStep("2. SOC 区间 0%~60%；");
+  executeStep("3. 下发充电指令，执行 1C 倍率充电；");
+  executeStep("4. 持续监控充电 SOP 报文、实际充电电流、屏显及平台状态");
+  write("  Expected:");
+  verifyExpectation("电池理论 1C 充电功率为 107kw，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以60kw 满功率稳定充电；系统无降功率、无告警，充电运行正常");
+  write(" ");
+}
+
+void runCase_SOP_005()
+{
+  logTestCase("SOP-005", "临工新能源电池(71kwh) 
+ 20℃~45℃、SOC0%~60% 1C 倍率充电验证 ");
+  write("  Priority: 1-High");
+  write("  Description: 验证临工新能源电池在适宜充电温度区间、低中 SOC 段，充电 SOP 可支持 1C 倍率正常充电，无降额限流");
+  write("  Precondition: 1. 整机高压上电完成，无故障、无告警；2. 搭载临工新能源配套电池；3. 充电回路正常，无保护限制触发");
+  write("  Steps:");
+  executeStep("1. 电池温度 20℃~45℃；");
+  executeStep("2.SOC 区间 0%~60%；");
+  executeStep("3. 下发充电指令，开启 1C 倍率充电；");
+  executeStep("4. 监控充电 SOP 报文、实际充电电流、整机屏显及后台平台");
+  write("  Expected:");
+  verifyExpectation("电池理论 1C 充电功率为 71kW，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以 30kW 满功率稳定充电；系统无降功率、无告警，充电运行正常");
+  write(" ");
+}
+
+void runCase_SOP_006()
+{
+  logTestCase("SOP-006", "临工新能源电池(107kwh) 
+ 20℃~45℃、SOC0%~60% 1C 倍率充电验证 ");
+  write("  Priority: 1-High");
+  write("  Description: 验证临工新能源电池在适宜充电温度区间、低中 SOC 段，充电 SOP 可支持 1C 倍率正常充电，无降额限流");
+  write("  Precondition: 1. 整机高压上电完成，无故障、无告警；2. 搭载临工新能源配套电池；3. 充电回路正常，无保护限制触发");
+  write("  Steps:");
+  executeStep("1. 电池温度 20℃~45℃；");
+  executeStep("2.SOC 区间 0%~60%；");
+  executeStep("3. 下发充电指令，开启 1C 倍率充电；");
+  executeStep("4. 监控充电 SOP 报文、实际充电电流、整机屏显及后台平台");
+  executeStep("1、整机高压上电完成");
+  executeStep("2、查看报文");
+  executeStep("1、整机高压上电完成");
+  executeStep("2、查看报文");
+  executeStep("1、整机高压上电完成");
+  executeStep("2、查看报文");
+  executeStep("1、整机高压上电完成");
+  executeStep("2、查看报文");
+  executeStep("1、整机高压上电完成");
+  executeStep("2、查看报文");
+  executeStep("1. BMS接通，上位机与其连接正常；2. 上位机选择本地匹配升级文件，点击开始升级；3. 升级完成后重启BMS，验证版本及功能。");
+  write("  Expected:");
+  verifyExpectation("电池理论 1C 充电功率为 107kw，BMS 充电 SOP 开放 1C 倍率权限；受整机硬件限制，实际以 60kw 满功率稳定充电；系统无降功率、无告警，充电运行正常");
+  verifyExpectation("18FF01F3xh soc=");
+  verifyExpectation("18FF01F3xh Vol_Bat=");
+  verifyExpectation("18FF01F3xh cur_Bat=");
+  verifyExpectation("18FF02F3xh BMS_BatStatus=2");
+  verifyExpectation("18FF05F3xh InsulationValue=");
+  verifyExpectation("1. 连接稳定，文件识别正常；2. 升级无卡顿，完成后自动重启；3. 版本匹配，BMS功能正常。");
+  write(" ");
+}
